@@ -151,11 +151,11 @@ head(dados)
 Para esse exemplo prático vamos utilizar os pacotes `tidyverse`, `vegan`, `corrplot` e `plotrix`.
 
 ```{r, message=FALSE}
-library("tidyverse")
-library("vegan")
-library("corrplot")
-library("lattice")
-library("plotrix")
+library(tidyverse)
+library(vegan)
+library(corrplot)
+library(lattice)
+library(plotrix)
 ```
 
 # 7. Conhecendo a estrutura dos dados
@@ -498,6 +498,175 @@ heatmap(as.matrix(da_pad_euc),
         labRow =rotulos,
         labCol=rotulos)
 ```
+# 9. Análise de Componentes principais (PCA)
+
+A técnica busca reduzir o espaço de variáveis criando eixos ortogonais que são combinações lineares das variáveis originais denominados componentes principais. 
+
+É medido o poder de cada variável no seu respectivo componente, o que permite diminuir a estrutura de variáveis originais numa nova estrutura menor que a inicial. 
+
+As unidades amostrais (ou objetos) são distribuídas em gráficos bidimensionais ou tridimensionais onde os eixos ortogonais são os componentes principais.
+
+De maneira geral, apensar de mais complexa matematicamente que a análise de agrupamento, espera-se que a ACP seja concordante com a análise de cluster.
+
+Cada componente principal é uma combinação linear das variáveis originais. 
+
+Uma medida da quantidade de informação explicada por cada componente principal é a sua variância. Por esta razão os componentes principais são ordenados em ordem decrescente da sua variância, ou seja, o componente principal que contém mais informação é o primeiro, sendo o último àquele componente principal com menos informação.
+
+
+Função responsável por realizar a análise é a `prcomp` presente no sistema base do R. Os dados devem ser padronizados e essa opção é feita a partir do argumento `scale. = TRUE`.
+
+```{r}
+pca <-  prcomp(da,scale.=T)
+```
+
+
+
+Resumo da análise ondem são apresentados a desvio padrão de cada componente, juntamente com a porcentagem da variação explicada individual e acumulada.
+
+```{r}
+summary(pca)
+```
+
+Os autovalores (eigenvalues) pode ser calculados como:
+```{r}
+eig<-pca$sdev^2
+eig
+```
+# % da variância explicada
+
+```{r}
+ve<-eig/sum(eig)
+ve
+```
+
+#% da variância acumulada
+
+```{r}
+cumsum(ve)
+```
+
+
+
+```{r}
+pca # Autovalores das variáveis
+pca$x # coordenadas dos acessos
+```
+
+
+```{r}
+# correlações entre cada variável - poder discriminante
+mcor<-cor(da,pca$x) 
+mcor %>% 
+  corrplot()
+```
+
+
+```{r}
+# Screeplot, para verificar os PCs maiores que a Unidade, de acordo com Kaiser (1958), valores maiores que 1.
+screeplot(pca)
+abline(h=1,lty=2)
+
+# Screeplot construído a partir da função barplot
+barplot(eig,
+        names.arg=colnames(pca$rotation),
+        ylim=c(0,(pca$sdev^2)[1]*1.1),
+    ylab="Inertia",xlab="Principal Component",cex.lab=1.2
+    ,main="Sreeplot")
+abline(h=1,lty=2)
+```
+#### Construção do Biplot 
+
+```{r}
+biplot(rda(da),pch=2)
+ordihull(rda(da),
+         group = grupo,col=1:nlevels(as.factor(grupo)))
+```
+
+```{r}
+# Construção do biplot usando as funções básicas
+pc1V<-cor(da,pca$x)[,1]/sd(cor(da,pca$x)[,1])
+pc2V<-cor(da,pca$x)[,2]/sd(cor(da,pca$x)[,2])
+pc1c<-pca$x[,1]/sd(pca$x[,1])
+pc2c<-pca$x[,2]/sd(pca$x[,2])
+nv<-ncol(da) # número de variáveis utilizadas na análise
+plot(pc1V,pc2V,
+     xlim=c(min(-3,pc1V,pc1c),
+            max(pc1V,pc1c,5)),
+     ylim=c(min(pc2V,pc2c),
+            max(pc2V,pc2c)),pch="",las=1,
+     xlab=paste("PC1 (",round(100*ve[1],2),"%)",sep=""),
+     ylab=paste("PC2 (",round(100*ve[2],2),"%)",sep=""),
+     font.lab=2)
+abline(v=0,h=0)
+arrows(rep(0,nv),rep(0,nv),pc1V*.90,pc2V*.90,lwd=1.5,length=.1)
+text(pc1V,pc2V,names(pc1V),font=4)
+lv<-as.factor(grupo);nlv<-levels(lv)
+# Adicionando os identificadores dos acesso partir de uma variável categórica
+for(i in 1:length(nlv)){
+  ff<-lv==nlv[i]  
+  # points(pc1c[ff],pc2c[ff],cex=1.3,col=i,pch=i+15) 
+  # df$Municípios[ff]
+   text(pc1c[ff],pc2c[ff],rotulos[ff],cex=.8,col=i)}
+```
+
+# Biplot usando a ggplot2
+
+```{r}
+Agrupamento<-as.factor(grupo)
+bip<-data.frame(pc1c,pc2c,Agrupamento)
+texto <- data.frame(
+   x = pc1V,
+   y = pc2V,
+   label = names(da)
+)
+
+# texto[5,2] <- -0.7 # melhorando o biplot
+bip %>% ggplot(aes(x=pc1c,y=pc2c,color=Agrupamento))+
+  geom_point(aes(shape =Agrupamento, color = Agrupamento), size = 2)+ 
+  theme_minimal()+
+  scale_shape_manual(values=16:18)+
+  scale_color_manual(values=c("#999999","#D55E00","#009E73"))+
+  geom_vline(aes(xintercept=0),
+             color="black", size=1)+
+  geom_hline(aes(yintercept=0),
+             color="black", size=1)+
+  annotate(geom="segment",
+           x=rep(0,length(da)),
+           xend=texto$x,
+           y=rep(0,length(da)),
+           yend=texto$y,color="black",lwd=.5)+
+  geom_label(data=texto,aes(x=x,y=y,label=label),
+            color="black",angle=0,fontface="bold",size=4,fill="white")+
+  labs(x=paste("CP1 (",round(100*ve[1],2),"%)",sep=""),
+       y=paste("CP2 (",round(100*ve[2],2),"%)",sep=""))+
+  theme(legend.position = "top")
+```
+```{r}
+# Tabela do Biplot com as correlações com as PCs e seus respectivos autovetores
+ck<-sum(pca$sdev^2>=1)
+tabelapca<-vector()
+for( l in 1:ck) tabelapca<-cbind(tabelapca,mcor[,l])#,pca$rotation[,l])
+colnames(tabelapca)<-paste(rep(c("PC"),ck),1:ck,sep="")
+pcat<-round(tabelapca,3)
+summary(pcat)
+tabelapca<-tabelapca[order(abs(tabelapca[,1])),]
+tabelapca
+```
+
+```{r}
+# Uma opção à tabela resumo
+pyramid.plot(abs(tabelapca[,1]),abs(tabelapca[,2]),
+             labels = names(tabelapca[,1]),
+             unit="Correlation",gap=.1,raxlab=c(0,0.25,.5,.75,1),
+             top.labels = c("PC1 (33.85%)", "Variable", "PC2 (25.16%)"),
+laxlab=c(0,0.25,.5,.75,1),
+             lxcol=c("darkgray","white","darkgray","darkgray","darkgray",
+             "darkgray"),rxcol=c("white","white","darkgray","darkgray",
+             "white","white"))
+text(-1*abs(tabelapca[,1]),1:6,round(tabelapca[,1],2))
+text(abs(tabelapca[,2]+c(0,0,0,0,-.04,0)),1:6,round(tabelapca[,2],2))
+box()
+```
 
 
 # Referências
@@ -515,3 +684,7 @@ KAISER, H. F. The varimax criterion for analytic rotation in factor-analysis. **
 MINGOTI, S. A. **Análise de dados através de métodos de estatística multivariada: uma abordagem aplicada**. Belo Horizonte-MG: Editora UFMG, 2005. p.
 
 THOMAZINI, A.; MENDONCA, S.; TEIXEIRA, D. B.; ALMEIDA, I. C. C.; LA SCALA, N.; CANELLAS, L. P.; SPOKAS, K. A.; MILORI, D.; TURBAY, C. V. G.; FERNANDES, R. B. A.; SCHAEFER, C. CO2 and N2O emissions in a soil chronosequence at a glacier retreat zone in Maritime Antarctica. **Science of the Total Environment**, v. 521, n., p. 336-345, 2015.
+
+--------
+
+![](img/unesp_logo.png)
