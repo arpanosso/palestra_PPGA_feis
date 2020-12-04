@@ -503,6 +503,7 @@ heatmap(as.matrix(da_pad_euc),
         labRow =rotulos,
         labCol=rotulos)
 ```
+
 # 9. Análise de Componentes principais (PCA)
 
 A técnica busca reduzir o espaço de variáveis criando eixos ortogonais que são combinações lineares das variáveis originais denominados componentes principais. 
@@ -617,7 +618,7 @@ texto <- data.frame(
    label = names(da)
 )
 
-# texto[5,2] <- -0.7 # melhorando o biplot
+texto[5,2] <- -0.7 # melhorando o biplot
 bip %>% ggplot(aes(x=pc1c,y=pc2c,color=Agrupamento))+
   geom_point(aes(shape =Agrupamento, color = Agrupamento), size = 2)+ 
   theme_minimal()+
