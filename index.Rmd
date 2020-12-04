@@ -116,7 +116,7 @@ Rs é uma importante  variável do ciclo do carbono desse ecossitema, pois a cam
 
 ![](img/terra.png)
 
-Os dados são oriundos de esforços conjuntos entre as UNESP-UFV e parcerias internacionais, porém, ainda não foram publicados, assim, serão fornecidos parte do banco de dados original com os valores já padronizados.
+Os dados são oriundos de esforços conjuntos entre as UNESP-UFV e parcerias internacionais, porém, ainda não foram publicados, assim, será fornecida parte do banco de dados original com os valores já padronizados.
 
 
 ### 5.1. Importação da tabela de dados da web.
