@@ -5,6 +5,11 @@ date: "04/12/2020"
 output: html_document
 ---
 
+#### Link para a apresentação Canteral KFF:
+
+<https://github.com/arpanosso/palestra_PPGA_feis/blob/main/docs/Dissertacao_Canteral.pdf>
+
+
 # 1. Introdução
 
 Classificação das técnicas multivariadas (Dependências e Interdependência)
@@ -510,8 +515,7 @@ De maneira geral, apensar de mais complexa matematicamente que a análise de agr
 
 Cada componente principal é uma combinação linear das variáveis originais. 
 
-Uma medida da quantidade de informação explicada por cada componente principal é a sua variância. Por esta razão os componentes principais são ordenados em ordem decrescente da sua variância, ou seja, o componente principal que contém mais informação é o primeiro, sendo o último àquele componente principal com menos informação.
-
+Uma medida da quantidade de informação explicada por cada componente principal é a sua variância. Por esta razão os componentes principais são ordenados em ordem decrescente da sua variância, ou seja, o componente principal que contém mais informação é o primeiro, sendo o último aquele componente principal com menos informação.
 
 Função responsável por realizar a análise é a `prcomp` presente no sistema base do R. Os dados devem ser padronizados e essa opção é feita a partir do argumento `scale. = TRUE`.
 
@@ -520,10 +524,7 @@ pca <-  prcomp(da,scale.=T)
 ```
 
 
-
-
-
-Resumo da análise ondem são apresentados a desvio padrão de cada componente, juntamente com a porcentagem da variação explicada individual e acumulada.
+Resumo da análise onde são apresentados o desvio padrão de cada componente, juntamente com a porcentagem da variação explicada individual e acumulada.
 
 ```{r}
 summary(pca)
@@ -534,29 +535,31 @@ Os autovalores (eigenvalues) pode ser calculados como:
 eig<-pca$sdev^2
 eig
 ```
-# % da variância explicada
+#### % da variância explicada
 
 ```{r}
 ve<-eig/sum(eig)
 ve
 ```
 
-#% da variância acumulada
+#### % da variância acumulada
 
 ```{r}
 cumsum(ve)
 ```
 
+
+#### Correlações entre cada variável e o componente principal - poder discriminante
 ```{r}
-# correlações entre cada variável - poder discriminante
 mcor<-cor(da,pca$x) 
 mcor %>% 
   corrplot()
 ```
 
 
+
+#### Screeplot, útil para verificar os PCs maiores que a unidade, de acordo com Kaiser (1958), valores maiores que 1.
 ```{r}
-# Screeplot, para verificar os PCs maiores que a Unidade, de acordo com Kaiser (1958), valores maiores que 1.
 screeplot(pca)
 abline(h=1,lty=2)
 
@@ -568,7 +571,7 @@ barplot(eig,
     ,main="Sreeplot")
 abline(h=1,lty=2)
 ```
-#### Construção do Biplot 
+#### Representação bidimensional - Biplot 
 
 ```{r}
 biplot(rda(da),pch=2)
@@ -603,7 +606,7 @@ for(i in 1:length(nlv)){
    text(pc1c[ff],pc2c[ff],rotulos[ff],cex=.8,col=i)}
 ```
 
-# Biplot usando a ggplot2
+#### Biplot utilizando ggplot2
 
 ```{r}
 Agrupamento<-as.factor(grupo)
@@ -635,8 +638,9 @@ bip %>% ggplot(aes(x=pc1c,y=pc2c,color=Agrupamento))+
        y=paste("CP2 (",round(100*ve[2],2),"%)",sep=""))+
   theme(legend.position = "top")
 ```
+
+#### Tabela do Biplot com as correlações com as PCs e seus respectivos autovetores
 ```{r}
-# Tabela do Biplot com as correlações com as PCs e seus respectivos autovetores
 ck<-sum(pca$sdev^2>=1)
 tabelapca<-vector()
 for( l in 1:ck) tabelapca<-cbind(tabelapca,mcor[,l])#,pca$rotation[,l])
@@ -647,8 +651,8 @@ tabelapca<-tabelapca[order(abs(tabelapca[,1])),]
 tabelapca
 ```
 
+#### Uma opção à tabela resumo
 ```{r}
-# Uma opção à tabela resumo
 pyramid.plot(abs(tabelapca[,1]),abs(tabelapca[,2]),
              labels = names(tabelapca[,1]),
              unit="Correlation",gap=.1,raxlab=c(0,0.25,.5,.75,1),
