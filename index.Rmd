@@ -112,7 +112,7 @@ Instale alguns pacotes:
 
 Dados contém informações sobre a emissão de $CO_2$ do solo (Rs - respiração do solo) em diferentes regiões da Antártica marítima, os objetivos iniciais eram caracterizar a Rs e sua relação com alguns atributos como a temperatura, a umidade e o teor de carbono do orgânico solo dessas regiões.
 
-Rs é uma importante  variável do ciclo do carbono desse ecossitema, pois a camada de gelos está diminuindo devido às mudanças climáticas e os solos estão sendo expostos.
+Rs é uma importante  variável do ciclo do carbono desse ecossitema, pois a camada de gelo está diminuindo devido às mudanças climáticas e os solos estão sendo expostos.
 
 ![](img/terra.png)
 
@@ -506,7 +506,7 @@ A técnica busca reduzir o espaço de variáveis criando eixos ortogonais que s�
 
 As unidades amostrais (ou objetos) são distribuídas em gráficos bidimensionais ou tridimensionais onde os eixos ortogonais são os componentes principais.
 
-De maneira geral, apensar de mais complexa matematicamente que a análise de agrupamento, espera-se que a ACP seja concordante com a análise de cluster.
+De maneira geral, apensar de mais complexa matematicamente que a análise de agrupamento, espera-se que a ACP seja concordante com a análise de agrupamento.
 
 Cada componente principal é uma combinação linear das variáveis originais. 
 
@@ -518,6 +518,8 @@ Função responsável por realizar a análise é a `prcomp` presente no sistema 
 ```{r}
 pca <-  prcomp(da,scale.=T)
 ```
+
+
 
 
 
@@ -544,14 +546,6 @@ ve
 ```{r}
 cumsum(ve)
 ```
-
-
-
-```{r}
-pca # Autovalores das variáveis
-pca$x # coordenadas dos acessos
-```
-
 
 ```{r}
 # correlações entre cada variável - poder discriminante
